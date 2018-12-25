@@ -28,13 +28,31 @@ enet_ovs_attach_nic_br() {
 	ovs_dpdk_add_dpdk_port "${ovs_br}" "${port_name}" "${pci_addr}"
 }
 
-enet_fwd_del_flows_vlan() {
+enet_fwd_del_flows_vlan_push() {
 
 	local priority=$1
-	local port=$2
-	local vlan=$3
+	local in_port=$2
+	local out_vlan=$3
+	local out_port=$4
 
-	local in_vlan_hex=$(printf "0ff%03x" ${vlan})
+	local out_vlan_hex=$(printf '0ff%03x' ${out_vlan})
+	set -x
+	exec_delete=$(\
+			meaCli mea service show entry all | \
+			sed -n "s/^EXT${WS}\(.*\)${WS}${port}${WS}1${WS}0${WS}0x${out_vlan_hex}${WS}NA${WS}NA${WS}NA${WS}DC7${WS}NA${WS}noIP${WS}0.*$/meaCli mea service set delete \1;/p"\
+			)
+	set +x
+	exec_tgt "/" "${exec_delete}"
+}
+
+enet_fwd_del_flows_vlan_pop() {
+
+	local priority=$1
+	local in_port=$2
+	local in_vlan=$3
+	local out_port=$4
+
+	local in_vlan_hex=$(printf '0ff%03x' ${in_vlan})
 	set -x
 	exec_delete=$(\
 			meaCli mea service show entry all | \
@@ -46,13 +64,15 @@ enet_fwd_del_flows_vlan() {
 
 enet_fwd_add_flow_vlan_pop() {
 
-	local in_port=$1
-	local in_vlan=$2
-	local out_port=$3
+	local priority=$1
+	local in_port=$2
+	local in_vlan=$3
+	local out_port=$4
 	local in_vlan_mask=$(printf 'FF%03X' "${in_vlan}")
 
 	################################
 	#enet_fwd_del_flows_vlan \
+	#	${priority} \
 	#	${in_port} \
 	#	${in_vlan}
 	################################
@@ -71,13 +91,15 @@ enet_fwd_add_flow_vlan_pop() {
 
 enet_fwd_add_flow_vlan_push() {
 
-	local in_port=$1
-	local out_vlan=$2
-	local out_port=$3
+	local priority=$1
+	local in_port=$2
+	local out_vlan=$3
+	local out_port=$4
 	local out_vlan_header=$(printf '81000%03X' "${out_vlan}")
 
 	################################
-	#enet_ovs_del_flows_vlan \
+	#enet_fwd_del_flows_vlan \
+	#	${priority} \
 	#	${in_port} \
 	#	${in_vlan}
 	################################
@@ -102,10 +124,10 @@ enet_ovs_add_flow() {
 	shift 2
 
 	case ${flow_pattern} in
-		"priority=%d,in_port=%s,dl_vlan=%d,actions=strip_vlan,output:%s")
+		$ENET_FWD_VLAN_POP_PATTERN)
 		enet_fwd_add_flow_vlan_pop $@
 		;;
-		"priority=%d,in_port=%s,actions=push_vlan:0x8100,mod_vlan_vid=%d,output:%s")
+		$ENET_FWD_VLAN_PUSH_PATTERN)
 		enet_fwd_add_flow_vlan_push $@
 		;;
 		*)
@@ -120,11 +142,11 @@ enet_ovs_del_flows() {
 	shift 1
 
 	case ${flow_pattern} in
-		"priority=%d,in_port=%s,dl_vlan=%d,actions=strip_vlan,output:%s")
-		enet_fwd_del_flows_vlan $@
+		$ENET_FWD_VLAN_POP_PATTERN)
+		enet_fwd_del_flows_vlan_pop $@
 		;;
-		"priority=%d,in_port=%s,actions=push_vlan,output:%s")
-		enet_fwd_del_flows_vlan $@
+		$ENET_FWD_VLAN_PUSH_PATTERN)
+		enet_fwd_del_flows_vlan_push $@
 		;;
 		*)
 		print_log "UNSUPPORTED FLOWS PATTERN: ${flow_pattern}"
