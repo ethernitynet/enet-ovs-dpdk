@@ -108,12 +108,6 @@ enet_ovs_add_flow() {
 		"priority=%d,in_port=%s,actions=push_vlan:0x8100,mod_vlan_vid=%d,output:%s")
 		enet_fwd_add_flow_vlan_push $@
 		;;
-		"priority=%d,in_port=%s,dl_vlan=%d,ip,actions=strip_vlan,push_esp,spi:%d,auth_algo:%s,auth_key:%s,cipher_algo:%s,cipher_key:%s,tun_local_ip:%s,tun_remote_ip:%s,output:%s")
-		enet_ipsec_add_flow_vlan_pop_encrypt $@
-		;;
-		"priority=%d,in_port=%s,ip,nw_src=%s,nw_dst=%s,nw_proto=50,spi=%d,actions=push_vlan:0x8100,mod_vlan_vid=%d,strip_esp,auth_algo:%s,auth_key:%s,cipher_algo:%s,cipher_key:%s,output:%s")
-		enet_ipsec_add_flow_vlan_push_decrypt $@
-		;;
 		*)
 		print_log "UNSUPPORTED FLOW PATTERN: ${flow_pattern}"
 		;;
@@ -132,12 +126,6 @@ enet_ovs_del_flows() {
 		;;
 		"priority=%d,in_port=%s,actions=push_vlan,output:%s")
 		enet_fwd_del_flows_vlan $@
-		;;
-		"priority=%d,in_port=%s,dl_vlan=%d,ip,nw_src=%s,nw_dst=%s,actions=strip_vlan,push_esp,output:%s")
-		enet_ipsec_del_flows_vlan_pop_encrypt $@
-		;;
-		"priority=%d,in_port=%s,ip,nw_src=%s,nw_dst=%s,nw_proto=50,actions=push_vlan:0x8100,mod_vlan_vid=%d,strip_esp")
-		enet_ipsec_del_flows_vlan_push_decrypt $@
 		;;
 		*)
 		print_log "UNSUPPORTED FLOWS PATTERN: ${flow_pattern}"
