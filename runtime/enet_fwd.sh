@@ -2,10 +2,12 @@
 
 enet_exec() {
 
-	exec_tgt "/" "\
-		meaCli top;
-		sleep 0.1;
-		meaCli mea $@"
+	echo "$(\
+	exec_tgt '/' '\
+		meaCli top;\
+		sleep 0.1;\
+		meaCli mea $@'\
+		)"
 }
 
 enet_ovs_add_nic_br() {
@@ -28,14 +30,15 @@ enet_ovs_attach_nic_br() {
 
 enet_fwd_del_flows_vlan() {
 
-	local in_port=$1
-	local in_vlan=$2
+	local priority=$1
+	local port=$2
+	local vlan=$3
 
-	local in_vlan_hex=$(printf "0ff%03x" ${in_vlan})
+	local in_vlan_hex=$(printf "0ff%03x" ${vlan})
 	set -x
 	exec_delete=$(\
 			meaCli mea service show entry all | \
-			sed -n "s/^EXT${WS}\(.*\)${WS}${in_port}${WS}1${WS}0${WS}0x${in_vlan_hex}${WS}NA${WS}NA${WS}NA${WS}DC7${WS}NA${WS}noIP${WS}0.*$/meaCli mea service set delete \1;/p"\
+			sed -n "s/^EXT${WS}\(.*\)${WS}${port}${WS}1${WS}0${WS}0x${in_vlan_hex}${WS}NA${WS}NA${WS}NA${WS}DC7${WS}NA${WS}noIP${WS}0.*$/meaCli mea service set delete \1;/p"\
 			)
 	set +x
 	exec_tgt "/" "${exec_delete}"

@@ -36,14 +36,6 @@ enet_ipsec_del_flows_vlan_push_decrypt() {
 	local tun_local_ip=$4
 	local out_vlan=$5
 
-
-
-	local in_port=$1
-	local out_port=$2
-	local protected_net=$3
-	local trusted_net=$4
-
-	#local out_vlan=$(nic_get_unique_vlan_by_subnets ${protected_net} ${trusted_net})
 	local out_vlan_hex=$(printf '0x81000%03x' ${out_vlan})
 	set -x
 	exec_delete=$(\
@@ -52,15 +44,14 @@ enet_ipsec_del_flows_vlan_push_decrypt() {
 			)
 	set +x
 	eval "${exec_delete}"
-	nic_flow_vlan_clear "${enet_ipsec_vport}" "${out_vlan}"
-	echo "${out_vlan}"
+	enet_fwd_del_flows_vlan "${ENET_VPORT_IPSEC}" "${out_vlan}"
 }
 
 enet_ipsec_add_flow_vlan_pop_encrypt() {
 
 	local priority=$1
 	local in_port=$2
-	local dl_vlan=$3
+	local in_vlan=$3
 	local nw_src_trusted=$4
 	local nw_dst_protected=$5
 	local push_esp_spi=$6
@@ -75,6 +66,7 @@ enet_ipsec_add_flow_vlan_pop_encrypt() {
 	local in_vlan_header=$(printf '81000%03X' "${in_vlan}")
 
 	################################
+	local in_vlan=$(enet_ipsec_unique_vlan_by_subnets ${nw_src_trusted} ${nw_dst_protected})
 	local in_vlan=$(\
 	nic_flow_vlan_pop_encrypt_and_fwd_clear \
 		${in_port} \
