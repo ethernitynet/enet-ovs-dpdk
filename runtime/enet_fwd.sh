@@ -116,9 +116,8 @@ enet_ovs_add_flow() {
 
 enet_ovs_del_flows() {
 
-	local ovs_br=$1
-	local flow_pattern=$2
-	shift 2
+	local flow_pattern=$1
+	shift 1
 
 	case ${flow_pattern} in
 		"priority=%d,in_port=%s,dl_vlan=%d,actions=strip_vlan,output:%s")
@@ -136,13 +135,14 @@ enet_ovs_del_flows() {
 enet_ovs() {
 
 	local cmd=$1
+	local nic_br=$2
 	shift
 
-	case ${cmd} in
-		"add-flow")
+	case "${cmd} ${nic_br}" in
+		"add-flow $ENET_NIC_BR")
 		enet_ovs_add_flow $@
 		;;
-		"del-flows")
+		"del-flows $ENET_NIC_BR")
 		enet_ovs_del_flows $@
 		;;
 		*)

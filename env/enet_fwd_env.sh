@@ -3,7 +3,6 @@
 export WS="\s\{1,\}"
 export ENET_FLAG_CLASSIFY_UNTAGGED="-l2Type 0"
 export ENET_FLAG_CLASSIFY_TAGGED="-l2Type 1"
-export ENET_VPORT_IPSEC=27
 
 export ENET_ENG_ID_VLAN_POP=3
 export ENET_ENG_ID_VLAN_PUSH=1
