@@ -15,17 +15,16 @@ enet_ovs_add_nic_br() {
 	local nic_br=$1
 	
 	enet_exec "service set delete all"
-	print_log "enet-ovs add-nic-br ${nic_br}"
 }
 
-enet_ovs_attach_nic_br() {
+enet_ovs_attach_nic_port() {
 
 	local nic_br=$1
 	local ovs_br=$2
 	local port_name=$3
 	local pci_addr=$4
 	
-	ovs_dpdk_add_dpdk_port "${ovs_br}" "${port_name}" "${pci_addr}"
+	ovs_dpdk add-dpdk-port "${ovs_br}" "${port_name}" "${pci_addr}"
 }
 
 enet_fwd_del_flows_vlan_push() {
@@ -119,7 +118,7 @@ enet_fwd_add_flow_vlan_push() {
 
 enet_ovs_add_flow() {
 
-	local ovs_br=$1
+	local nic_br=$1
 	local flow_pattern=$2
 	shift 2
 
@@ -138,7 +137,8 @@ enet_ovs_add_flow() {
 
 enet_ovs_del_flows() {
 
-	local flow_pattern=$1
+	local nic_br=$1
+	local flow_pattern=$2
 	shift 1
 
 	case ${flow_pattern} in
@@ -161,6 +161,12 @@ enet_ovs() {
 	shift
 
 	case "${cmd} ${nic_br}" in
+		"add-nic-br $ENET_NIC_BR")
+		enet_ovs_add_nic_br $@
+		;;
+		"attach-nic-port $ENET_NIC_BR")
+		enet_ovs_attach_nic_port $@
+		;;
 		"add-flow $ENET_NIC_BR")
 		enet_ovs_add_flow $@
 		;;
