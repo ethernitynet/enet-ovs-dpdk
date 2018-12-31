@@ -1,6 +1,6 @@
 #!/bin/bash
 
-OVS_IMG=${1:-local}
+IMG_DOMAIN=${1:-local}
 OVS_VERSION=${3:-v2.10.1}
 
 docker volume rm $(docker volume ls -qf dangling=true)
@@ -9,16 +9,16 @@ docker rmi $(docker images --filter "dangling=true" -q --no-trunc)
 docker rmi $(docker images | grep "none" | awk '/ / { print $3 }')
 docker rm $(docker ps -qa --no-trunc --filter "status=exited")
 
-case ${OVS_IMG} in
+case ${IMG_DOMAIN} in
 	"hub")
-	OVS_IMG=ethernitynet/enet-ovs-dpdk:ovs-$OVS_VERSION
-	docker pull $OVS_IMG
+	IMG_TAG=ethernitynet/enet-ovs-dpdk:$OVS_VERSION
+	docker pull $IMG_TAG
 	;;
 	*)
-	IMG_BASE=local/docker-ovs-dpdk:ovs-$OVS_VERSION
-	OVS_IMG=local/enet-ovs-dpdk:ovs-$OVS_VERSION
+	IMG_TAG=local/enet-ovs-dpdk:$OVS_VERSION
+	IMG_BASE=local/ovs-box:$OVS_VERSION
 	docker build \
-		-t $OVS_IMG \
+		-t $IMG_TAG \
 		--build-arg IMG_BASE=$IMG_BASE \
 		./
 	;;
@@ -30,5 +30,5 @@ docker run \
 	--privileged \
 	-v /mnt/huge:/mnt/huge \
 	--device=/dev/uio0:/dev/uio0 \
-	$OVS_IMG \
+	$IMG_TAG \
 	/bin/bash

@@ -1,15 +1,15 @@
 
-ARG IMG_BASE=ethernitynet/enet-ovs-dpdk:ovs-v2.10.1
+ARG IMG_BASE=shrewdthingsltd/ovs-box:v2.10.1
 
 FROM $IMG_BASE
 
-COPY app/utils/*.sh ${SRC_DIR}/utils/
-COPY app/env/*.sh ${SRC_DIR}/env/
-COPY app/entrypoint/*.sh ${SRC_DIR}/
+COPY app/ ${SRC_DIR}/
+ENV BASH_ENV=${SRC_DIR}/docker-entrypoint.sh
 
 RUN enet_build
 
-COPY app/runtime/*.sh ${SRC_DIR}/runtime/
+COPY runtime/ ${SRC_DIR}/runtime/
+ENV BASH_ENV=${SRC_DIR}/app-entrypoint.sh
 
 WORKDIR ${SRC_DIR}
 
