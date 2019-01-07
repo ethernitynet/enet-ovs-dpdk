@@ -1,0 +1,42 @@
+{
+	"type": "object",
+	"options": {
+		"disable_edit_json": true,
+		"disable_properties": true,
+		"collapsed": true
+	},
+	"properties": {
+		"SW Installation Directory": {
+			"type": "string",
+			"options": {
+				"input_width": "600px"
+			},
+			"default": "/home/devops"
+		},
+		"SW Package Full Path": {
+			"type": "string",
+			"options": {
+				"input_width": "600px"
+			},
+			"default": "/home/devops/ENET_SmartNic_ver_1.31A.tgz"
+		},
+		"HW Package Full Path": {
+			"type": "string",
+			"options": {
+				"input_width": "600px"
+			},
+			"default": "/home/devops/HW.tgz"
+		},
+		"Log File Path": {
+			"type": "string",
+			"options": {
+				"input_width": "600px"
+			},
+			"default": "/tmp/enet-log.log"
+		},
+		"Interface Name": {
+			"type": "string",
+			"default": "ens1"
+		}
+	}
+}
