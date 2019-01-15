@@ -1,30 +1,31 @@
 #!/bin/bash
 
-enet_exec() {
-
-	echo "$(\
-	exec_tgt '/' '\
-		meaCli top;\
-		sleep 0.1;\
-		meaCli mea $@'\
-		)"
-}
-
 enet_ovs_add_nic_br() {
 
 	local nic_br=$1
 	
 	enet_exec "service set delete all"
+	enet_exec "action set delete all"
+	enet_exec "forwarder delete all"
+	enet_exec "port ingress set all -a 1 -c 0"
+	enet_exec "port egress set all -a 1 -c 0"
+}
+
+enet_ovs_attach_nic_dpdk_port() {
+
+	local ovs_br=$1
+	local port_name=$2
+	local pci_addr=$3
+	
+	ovs_dpdk add-dpdk-port "${ovs_br}" "${port_name}" "${pci_addr}"
 }
 
 enet_ovs_attach_nic_port() {
 
-	local nic_br=$1
-	local ovs_br=$2
-	local port_name=$3
-	local pci_addr=$4
+	local ovs_br=$1
+	local port_name=$2
 	
-	ovs_dpdk add-dpdk-port "${ovs_br}" "${port_name}" "${pci_addr}"
+	ovs_dpdk add-port "${ovs_br}" "${port_name}"
 }
 
 enet_fwd_del_flows_vlan_push() {
@@ -158,11 +159,14 @@ enet_ovs() {
 
 	local cmd=$1
 	local nic_br=$2
-	shift
+	shift 2
 
 	case "${cmd} ${nic_br}" in
 		"add-nic-br $ENET_NIC_BR")
 		enet_ovs_add_nic_br $@
+		;;
+		"attach-nic-dpdk-port $ENET_NIC_BR")
+		enet_ovs_attach_nic_dpdk_port $@
 		;;
 		"attach-nic-port $ENET_NIC_BR")
 		enet_ovs_attach_nic_port $@
