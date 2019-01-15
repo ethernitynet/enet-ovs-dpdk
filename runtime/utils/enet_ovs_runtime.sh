@@ -1,16 +1,17 @@
 #!/bin/bash
 
+
 enet_exec() {
 
+        set +x
 ################################
-local enet_pattern="meaCli mea %s $@"
-[[ ${ACENIC_ID} > 0 ]] && enet_pattern="meaCli -card %d mea $@"
-local enet_cmd=$(printf "${enet_pattern}" ${ACENIC_ID})
+local card_id_flag=" "
+[[ ${ACENIC_ID} > 0 ]] && card_id_flag="-card ${ACENIC_ID}"
+local enet_pattern="meaCli %s top; sleep 0.1; meaCli %s mea $@"
+local enet_cmd=$(printf "${enet_pattern}" "${card_id_flag}" "${card_id_flag}")
 ################################
-	exec_tgt '/' "\
-		meaCli top;\
-		sleep 0.1;\
-		eval '${enet_cmd}'"
+        exec_tgt '/' "${enet_cmd}"
+        set +x
 }
 
 enet_run() {
