@@ -24,11 +24,18 @@ enet_ovs_attach() {
 
 	local ovs_br=$1
 	
+	ovs_cmd_create
+	ovs_vsctl_remote_create
+	ovsdb_reset
 	if [[ ${ENET_OVS_DATAPLANE} == "userspace" ]]
 	then
+		ovsdb_server_start
+		ovs_restart
 		ovs_dpdk add-dpdk-br ${ovs_br}
 		enet_ovs attach-nic-dpdk-port $ENET_NIC_BR ${ovs_br} $ENET_NIC_INTERFACE $ENET_NIC_PCI
 	else
+		ovsdb_server_kernel_start
+		ovs_kernel_restart
 		ovs_dpdk add-br ${ovs_br}
 		enet_ovs attach-nic-port $ENET_NIC_BR ${ovs_br} $ENET_NIC_INTERFACE
 	fi
