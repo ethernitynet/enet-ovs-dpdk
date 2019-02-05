@@ -32,14 +32,14 @@ enet_ovs_attach() {
 		ovsdb_server_start
 		ovs_restart
 		ovs_dpdk add-dpdk-br ${ovs_br}
-		enet_ovs attach-nic-dpdk-port $ENET_NIC_BR ${ovs_br} $ENET_NIC_INTERFACE $ENET_NIC_PCI
+		enet_ovs attach-nic-dpdk-port $ENET_NIC_BR ${ovs_br} $ACENIC_LABEL $ACENIC_710_SLOT
 	else
 		ovsdb_server_kernel_start
 		ovs_kernel_restart
 		ovs_dpdk add-br ${ovs_br}
-		enet_ovs attach-nic-port $ENET_NIC_BR ${ovs_br} $ENET_NIC_INTERFACE
+		enet_ovs attach-nic-port $ENET_NIC_BR ${ovs_br} $ACENIC_LABEL
 	fi
-	ovs_dpdk set-port-id $ENET_NIC_INTERFACE 127
+	ovs_dpdk set-port-id $ACENIC_LABEL 127
 }
 
 enet_add_vlan_bypass_br() {
@@ -60,5 +60,5 @@ enet_add_vlan_bypass_br() {
 	enet_ovs add-flow $ENET_NIC_BR $ENET_FWD_VLAN_POP_PATTERN ${outbound_priority} $ENET_HOST_PORT 107 107
 	
 	ovs_dpdk add-dpdk-br ${ovs_br}
-	enet_ovs attach-nic-port $ENET_NIC_BR ${ovs_br} $ENET_NIC_INTERFACE $ENET_NIC_PCI
+	enet_ovs attach-nic-port $ENET_NIC_BR ${ovs_br} $ACENIC_LABEL $ACENIC_710_SLOT
 }
