@@ -47,3 +47,4 @@ docker run \
 	--name=$DOCKER_INST \
 	$IMG_TAG \
 	/bin/bash
+
