@@ -36,12 +36,12 @@ enet_fwd_del_flows_vlan_push() {
 	local out_port=$4
 
 	local out_vlan_hex=$(printf '0ff%03x' ${out_vlan})
-	set -x
+	#set -x
 	exec_delete=$(\
 			meaCli mea service show entry all | \
 			sed -n "s/^EXT${WS}\(.*\)${WS}${port}${WS}1${WS}0${WS}0x${out_vlan_hex}${WS}NA${WS}NA${WS}NA${WS}DC7${WS}NA${WS}noIP${WS}0.*$/meaCli mea service set delete \1;/p"\
 			)
-	set +x
+	#set +x
 	exec_tgt "/" "${exec_delete}"
 }
 
@@ -53,12 +53,12 @@ enet_fwd_del_flows_vlan_pop() {
 	local out_port=$4
 
 	local in_vlan_hex=$(printf '0ff%03x' ${in_vlan})
-	set -x
+	#set -x
 	exec_delete=$(\
 			meaCli mea service show entry all | \
 			sed -n "s/^EXT${WS}\(.*\)${WS}${port}${WS}1${WS}0${WS}0x${in_vlan_hex}${WS}NA${WS}NA${WS}NA${WS}DC7${WS}NA${WS}noIP${WS}0.*$/meaCli mea service set delete \1;/p"\
 			)
-	set +x
+	#set +x
 	exec_tgt "/" "${exec_delete}"
 }
 
